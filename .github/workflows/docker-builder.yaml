@@ -33,5 +33,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/tproxy-transparent-proxy:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/tproxy-transparent-proxy:${{ github.ref_name }}
+            ${{ vars.DOCKER_USERNAME }}/tproxy-transparent-proxy:latest
+            ${{ vars.DOCKER_USERNAME }}/tproxy-transparent-proxy:${{ github.ref_name }}
