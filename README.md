@@ -1,5 +1,7 @@
 # tproxy-transparent-proxy
 
+A transparent proxy gateway based on macvlan, tproxy, and mihomo, deployed as a Docker container to connect corporate networks to global infrastructure.
+
 ## Linux netfilter modules
 
 ![Linux Netfilter Modules](./assets/linux-netfilter-module.png)

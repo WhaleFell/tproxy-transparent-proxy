@@ -11,29 +11,34 @@ unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy
 
 # Prepare routing policy for TPROXY mark 1 traffic.
 # 为 TPROXY 的 mark=1 流量准备策略路由。
-if ! ip rule show | grep -q 'fwmark 0x1 lookup 100'; then
+if ! ip rule show 2>/dev/null | grep -q 'fwmark 0x1 lookup 100'; then
   ip rule add fwmark 1 table 100
   log "Added IPv4 policy rule: fwmark 1 -> table 100"
 fi
 
-if ! ip -6 rule show | grep -q 'fwmark 0x1 lookup 106'; then
+if ! ip -6 rule show 2>/dev/null | grep -q 'fwmark 0x1 lookup 106'; then
   ip -6 rule add fwmark 1 table 106
   log "Added IPv6 policy rule: fwmark 1 -> table 106"
 fi
 
-if ! ip route show table 100 | grep -q 'local 0.0.0.0/0 dev lo'; then
+if ! ip route show table 100 2>/dev/null | grep -q 'local 0.0.0.0/0 dev lo'; then
   ip route add local 0.0.0.0/0 dev lo table 100
   log "Added IPv4 local route in table 100"
 fi
 
-if ! ip -6 route show table 106 | grep -q 'local ::/0 dev lo'; then
+if ! ip -6 route show table 106 2>/dev/null | grep -q 'local ::/0 dev lo'; then
   ip -6 route add local ::/0 dev lo table 106
   log "Added IPv6 local route in table 106"
 fi
 
 # Apply nftables rules before starting mihomo.
 # 在启动 mihomo 前加载 nftables 规则。
-nft -f /mihomo/nftables.rules
+if ! nft -f /mihomo/nftables.rules; then
+  log "Failed to load nftables rules."
+  log "Please ensure host kernel supports nft socket/tproxy modules: nft_socket, nft_tproxy, nf_socket_ipv4, nf_socket_ipv6, nf_tproxy_ipv4, nf_tproxy_ipv6."
+  log "nftables 规则加载失败，请确认宿主机内核已启用/加载 nft socket/tproxy 相关模块。"
+  exit 1
+fi
 log "Loaded nftables rules from /mihomo/nftables.rules"
 
 CONFIG_FILE=""
