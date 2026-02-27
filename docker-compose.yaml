@@ -1,0 +1,49 @@
+services:
+  mihomo:
+
+    container_name: tproxy-transparent-proxy
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        
+
+    image: whalefell/tproxy-transparent-proxy:latest
+    restart: always
+    
+    # Required for nft/ip and transparent proxy routing rules.
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv6.conf.all.forwarding: "1"
+      net.core.somaxconn: "1024"
+
+    volumes:
+      - ./config:/mihomo/config
+
+    networks:
+      mihomo-macvlan:
+        ipv4_address: 192.168.8.213
+
+    environment:
+      TZ: Asia/Shanghai
+
+networks:
+  mihomo-macvlan:
+    name: mihomo-macvlan
+    driver: macvlan
+
+    driver_opts:
+      # Replace with your host NIC name, e.g. eth0/enp3s0.
+      parent: eth0
+    
+    ipam:
+      config:
+        - subnet: 192.168.8.0/24
+          gateway: 192.168.8.1
