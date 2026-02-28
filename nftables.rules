@@ -19,9 +19,14 @@ table inet xray {
                 meta l4proto tcp ip6 daddr fd00::/8 return
                 ip6 daddr fd00::/8 udp dport != 53 return
                 meta mark 0x000000ff return # lo xray inbound (direct)
+                # bypass ICMP
+                meta l4proto icmp return
+                meta l4proto ipv6-icmp return
+                # bypass UDP traceroute
+                udp dport 33434-33534 return
+                ip6 nexthdr udp udp dport 33434-33534 return
                 # above all traffic to FORWARD chain
                 
-                # bro
                 meta l4proto { tcp, udp } meta mark set 0x00000001 tproxy ip to 127.0.0.1:12380 accept
                 meta l4proto { tcp, udp } meta mark set 0x00000001 tproxy ip6 to [::1]:12380 accept
         }
