@@ -5,9 +5,29 @@ log() {
   printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
 }
 
+sync_default_assets() {
+  # Seed runtime directory from image defaults when target files are missing.
+  # 当运行目录缺少文件时，从镜像默认目录补齐资源。
+  mkdir -p /mihomo
+  if [ ! -d /usr/share/mihomo-defaults ]; then
+    return 0
+  fi
+
+  for src in /usr/share/mihomo-defaults/*; do
+    [ -e "$src" ] || continue
+    dst="/mihomo/$(basename "$src")"
+    if [ ! -e "$dst" ]; then
+      cp -a "$src" "$dst"
+      log "Seeded default asset: $dst"
+    fi
+  done
+}
+
 # Ensure no runtime proxy variables affect startup behavior.
 # 确保运行时代理变量不会影响启动行为。
 unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy
+
+sync_default_assets
 
 # Prepare routing policy for TPROXY mark 1 traffic.
 # 为 TPROXY 的 mark=1 流量准备策略路由。
@@ -33,13 +53,13 @@ fi
 
 # Apply nftables rules before starting mihomo.
 # 在启动 mihomo 前加载 nftables 规则。
-if ! nft -f /mihomo/nftables.rules; then
+if ! nft -f /etc/nftables.rules; then
   log "Failed to load nftables rules."
   log "Please ensure host kernel supports nft socket/tproxy modules: nft_socket, nft_tproxy, nf_socket_ipv4, nf_socket_ipv6, nf_tproxy_ipv4, nf_tproxy_ipv6."
   log "nftables 规则加载失败，请确认宿主机内核已启用/加载 nft socket/tproxy 相关模块。"
   exit 1
 fi
-log "Loaded nftables rules from /mihomo/nftables.rules"
+log "Loaded nftables rules from /etc/nftables.rules"
 
 CONFIG_FILE=""
 if [ -f /mihomo/config.yaml ]; then
