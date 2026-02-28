@@ -62,7 +62,7 @@ ENV HTTP_PROXY= \
     http_proxy= \
     https_proxy=
 
-COPY --from=builder --chmod=755 /build/mihomo /mihomo/mihomo
+COPY --from=builder --chmod=755 /build/mihomo /usr/bin/mihomo
 COPY --from=builder /build/GeoIP.dat /mihomo/GeoIP.dat
 COPY --from=builder /build/GeoSite.dat /mihomo/GeoSite.dat
 COPY --from=builder /build/ui/zashboard /mihomo/ui/zashboard
@@ -70,4 +70,4 @@ COPY nftables.rules /mihomo/nftables.rules
 COPY --chmod=755 entrypoint.sh /mihomo/entrypoint.sh
 
 ENTRYPOINT ["/mihomo/entrypoint.sh"]
-CMD ["/mihomo/mihomo", "-d", "/mihomo/", "-f", "/mihomo/config/config.yaml"]
+CMD ["/usr/bin/mihomo", "-d", "/mihomo/", "-f", "/mihomo/config/config.yaml"]

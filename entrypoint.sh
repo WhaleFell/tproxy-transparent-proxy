@@ -52,7 +52,7 @@ fi
 # 若配置文件存在，则先执行配置校验。
 if [ -n "${CONFIG_FILE}" ]; then
   log "Found config file: ${CONFIG_FILE}. Validating..."
-  if ! /mihomo/mihomo -t -d /mihomo; then
+  if ! /usr/bin/mihomo -t -d /mihomo; then
     log "Configuration validation failed. Exit."
     exit 1
   fi
